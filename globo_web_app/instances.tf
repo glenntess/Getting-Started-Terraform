@@ -1,4 +1,4 @@
-﻿##################################################################################
+##################################################################################
 # DATA
 ##################################################################################
 
@@ -16,10 +16,12 @@ resource "aws_instance" "nginx" {
   iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
   depends_on             = [aws_iam_role_policy.allow_s3_all]
 
-  user_data = templatefile("${path.module}/templates/startup_script.tpl",{
-    s3_bucket_name = aws_s3_bucket.web_bucket.id})
+  user_data = templatefile("${path.module}/templates/startup_script.tpl", {
+  s3_bucket_name = aws_s3_bucket.web_bucket.id })
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, {
+    Name = "${local.naming_prefix}-nginx-${count.index}"
+  })
 
 }
 
@@ -43,13 +45,15 @@ resource "aws_iam_role" "allow_nginx_s3" {
 }
 EOF
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, {
+    Name = "${local.naming_prefix}-nginx"
+  })
 
 }
 
 # aws_iam_instance_profile
 resource "aws_iam_instance_profile" "nginx_profile" {
-  name = "nginx_profile"
+  name = "${local.naming_prefix}-nginx_profile"
   role = aws_iam_role.allow_nginx_s3.name
 
   tags = local.common_tags
@@ -58,7 +62,7 @@ resource "aws_iam_instance_profile" "nginx_profile" {
 
 # aws_iam_role_policy
 resource "aws_iam_role_policy" "allow_s3_all" {
-  name = "allow_s3_all"
+  name = "${local.naming_prefix}-allow_s3_all"
   role = aws_iam_role.allow_nginx_s3.name
 
   policy = <<EOF
