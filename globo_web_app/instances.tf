@@ -14,10 +14,10 @@ resource "aws_instance" "nginx" {
   subnet_id              = module.app.public_subnets[(count.index % var.vpc_public_subnet_count)]
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
-  depends_on             = [aws_iam_role_policy.allow_s3_all]
+  depends_on             = [module.web_app_s3]
 
   user_data = templatefile("${path.module}/templates/startup_script.tpl", {
-  s3_bucket_name = aws_s3_bucket.web_bucket.id })
+  s3_bucket_name = module.web_app_s3.web_bucket.id })
 
   tags = merge(local.common_tags, {
     Name = "${local.naming_prefix}-nginx-${count.index}"
