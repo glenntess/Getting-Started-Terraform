@@ -59,11 +59,13 @@ variable "company" {
 variable "project" {
   type        = string
   description = "Project name for resource tagging"
+  default = "globo-web-app"
 }
 
 variable "billing_code" {
   type        = string
   description = "Billing code for resource tagging"
+  default     = "ACCT8675309"
 }
 
 variable "naming_prefix" {
